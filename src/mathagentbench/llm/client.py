@@ -44,4 +44,24 @@ class OpenRouterClient(LLMClient):
         # - POST to /chat/completions
         # - Handle errors and retries
         # - Track token usage and cost
-        raise NotImplementedError
+        # raise NotImplementedError
+        # TODO: add retry with tenacity
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        payload = {"model": self.model, "messages": messages, **kwargs}
+
+        response = self.client.post(
+            f"{self.BASE_URL}/chat/completions", json=payload, headers=headers
+        )
+
+        response.raise_for_status()
+
+        data = response.json()
+        return {
+            "content": data["choices"][0]["message"]["content"],
+            "usage": data.get("usage", {}),
+            "model": data.get("model"),
+        }

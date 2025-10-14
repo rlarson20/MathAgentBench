@@ -330,6 +330,7 @@ This guide will take you from stubs to a presentable portfolio project. I'll bre
    ```
 
 3. **Add parsing helpers**:
+
    ```python
    def _parse_action(self, content: str) -> tuple[str, dict]:
        """Parse Action and Action Input from LLM response."""
@@ -392,6 +393,7 @@ This guide will take you from stubs to a presentable portfolio project. I'll bre
    ```
 
 2. **Implement retry loop**:
+
    ```python
    def solve(self, problem: Problem, tools: dict[str, Any]) -> AgentResult:
        attempts = []
@@ -499,6 +501,7 @@ This guide will take you from stubs to a presentable portfolio project. I'll bre
    ```
 
 2. **Implement comparison**:
+
    ```python
    def compare_results(results1: dict[str, Any], results2: dict[str, Any]) -> dict[str, Any]:
        m1, m2 = results1["metrics"], results2["metrics"]
@@ -552,6 +555,7 @@ This guide will take you from stubs to a presentable portfolio project. I'll bre
    ```
 
 2. **Implement SQLite storage** (optional but impressive):
+
    ```python
    class SQLiteStorage(ResultsStorage):
        def __init__(self, db_path: str | Path):
@@ -766,6 +770,7 @@ This guide will take you from stubs to a presentable portfolio project. I'll bre
    ```
 
 3. **Add docstrings everywhere**:
+
    ```python
    def solve(self, problem: Problem, tools: dict[str, Any]) -> AgentResult:
        """Solve a math problem using ReAct reasoning.
