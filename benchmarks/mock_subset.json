@@ -1,0 +1,28 @@
+{
+  "name": "GSM8K Subset",
+  "version": "1.0",
+  "problems": [
+    {
+      "id": "gsm8k_001",
+      "question": "Janet has 3 apples. She buys 2 more. How many does she have?",
+      "answer": "5",
+      "answer_type": "integer",
+      "difficulty": "easy",
+      "tags": [
+        "arithmetic",
+        "addition"
+      ]
+    },
+    {
+      "id": "gsm8k_002",
+      "question": "A rectangle has length 5 and width 3. What is its area?",
+      "answer": "15",
+      "answer_type": "integer",
+      "difficulty": "easy",
+      "tags": [
+        "geometry",
+        "multiplication"
+      ]
+    }
+  ]
+}
