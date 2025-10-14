@@ -1,7 +1,7 @@
 [project]
 name = "mathagentbench"
 version = "0.1.0"
-description = "Add your description here"
+description = "Evaluation framework for LLM agents on math problems"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -13,8 +13,28 @@ dependencies = [
     "sympy>=1.14.0",
 ]
 
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+mathagent = "mathagentbench.cli:cli"
+
+
 [dependency-groups]
 dev = ["pytest>=8.4.2", "pytest-cov>=7.0.0"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["src"]
+testpaths = ['tests']
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+
+[tool.mypy]
+mypy_path = "src"
+explicit_package_bases = true

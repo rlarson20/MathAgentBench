@@ -1,0 +1,10 @@
+services:
+  mathagent:
+    build: .
+    volumes:
+      - ./benchmarks:/app/benchmarks
+      - ./results:/app/results
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    network_mode: host

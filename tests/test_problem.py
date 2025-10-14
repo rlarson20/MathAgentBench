@@ -1,4 +1,4 @@
-from src.mathagentbench.core.problem import Problem, load_benchmark
+from mathagentbench.core.problem import Problem, load_benchmark
 
 
 def test_problem_dataclass_creation():
