@@ -55,7 +55,7 @@ for retry in range(max_retries):
 
 **DockerREPL**:
 
-- Spins up `python:3.13-slim` container per execution
+- Spins up `ghcr.io/astral-sh/uv:python3.13-alpine` container per execution
 - Pre-installs sympy, numpy, scipy at runtime
 - Enforces memory limit (512MB), timeout (30s), no network
 - Returns stdout/stderr/success

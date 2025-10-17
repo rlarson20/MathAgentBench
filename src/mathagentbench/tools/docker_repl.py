@@ -1,34 +1,36 @@
 """Docker-isolated Python REPL."""
 
 import docker
-from docker.errors import ImageNotFound
+from docker.errors import ImageNotFound, ContainerError
 from typing import Any
 
 
 class DockerREPL:
     """Executes Python code in isolated Docker container."""
 
-    DEPS = ["sympy", "numpy", "scipy"]
+    DEPS: list[str] = ["sympy", "numpy", "scipy"]
 
-    def __init__(self, timeout: int = 30, image: str = "python:3.13-slim"):
-        self.timeout = timeout
-        self.image = image
-        self._client = None
+    def __init__(
+        self, timeout: int = 30, image: str = "math-agent-bench-sandbox:latest"
+    ):
+        self.timeout: int = timeout
+        self.image: str = image
+        self._client = docker.from_env()
+        self._ensure_image(self._client, self.image)
 
-    @property
-    def client(self):
-        if self._client is None:
-            self._client = docker.from_env()
-            self._ensure_image()
-        return self._client
-
-    def _ensure_image(self) -> None:
+    @staticmethod
+    def _ensure_image(client: docker.DockerClient, image: str) -> None:
         """Ensure Docker image is available."""
         try:
-            self.client.images.get(self.image)
+            client.images.get(image)
         except ImageNotFound:
-            print(f"Pulling {self.image}...")
-            self.client.images.pull(self.image)
+            print(f"Building {image}...")
+            client.images.build(
+                path=".",
+                dockerfile="Sandbox.Dockerfile",
+                tag=image,
+                rm=True,
+            )
 
     def execute(self, code: str) -> dict[str, Any]:
         """Execute code in container.
@@ -39,36 +41,19 @@ class DockerREPL:
         Returns:
             Dict with stdout, stderr, success flag
         """
-        setup_script = f"""
-import subprocess
-import sys
-
-try:
-    import sympy
-    import numpy
-    import scipy
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + {self.DEPS})
-    import sympy
-    import numpy
-    import scipy
-
-{code}
-"""
-        
         try:
-            container = self.client.containers.run(
+            container = self._client.containers.run(
                 self.image,
-                command=["python", "-c", setup_script],
+                command=["uv", "run", "python", "-c", code],
                 detach=True,
-                mem_limit="512m",
+                mem_limit="1024m",
                 network_disabled=True,
-                remove=True,
             )
-
             result = container.wait(timeout=self.timeout)
             stdout = container.logs(stdout=True, stderr=False).decode()
             stderr = container.logs(stdout=False, stderr=True).decode()
+
+            container.remove()
 
             return {
                 "success": result["StatusCode"] == 0,
@@ -77,14 +62,14 @@ except ImportError:
                 "exit_code": result["StatusCode"],
             }
 
-        except docker.errors.ContainerError as e:
+        except ContainerError as e:
             return {
                 "success": False,
                 "stdout": "",
                 "stderr": str(e),
                 "exit_code": e.exit_status,
             }
-        except docker.errors.ImageNotFound as e:
+        except ImageNotFound as e:
             return {
                 "success": False,
                 "stdout": "",

@@ -175,7 +175,6 @@ This guide will take you from stubs to a presentable portfolio project. I'll bre
    import sys
    import sympy
    import numpy as np
-   from sympy import *
 
    {code}
    """
