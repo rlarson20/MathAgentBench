@@ -43,15 +43,15 @@ class DockerREPL:
 import subprocess
 import sys
 
+# Install uv first
 try:
-    import sympy
-    import numpy
-    import scipy
+    import uv
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + {self.DEPS})
-    import sympy
-    import numpy
-    import scipy
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "uv"])
+    import uv
+
+# Install dependencies
+subprocess.check_call([sys.executable, "-m", "uv", "pip", "install", "-q"] + {self.DEPS})
 
 {code}
 """
