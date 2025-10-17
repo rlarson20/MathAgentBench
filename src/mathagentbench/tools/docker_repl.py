@@ -39,33 +39,36 @@ class DockerREPL:
         Returns:
             Dict with stdout, stderr, success flag
         """
-        # TODO: Implement container execution
-        # - Prepend: pip install -q sympy numpy scipy
-        # - Run code with timeout
-        # - Capture stdout/stderr
-        # - Handle errors gracefully
-        # raise NotImplementedError
-        full_code = f"""
-        import sys
-        import sympy
-        import numpy as np
+        setup_script = f"""
+import subprocess
+import sys
 
-        {code}
-        """
+try:
+    import sympy
+    import numpy
+    import scipy
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + {self.DEPS})
+    import sympy
+    import numpy
+    import scipy
+
+{code}
+"""
+        
         try:
             container = self.client.containers.run(
                 self.image,
-                command=["uv", "run", "python", "-c", full_code],
+                command=["python", "-c", setup_script],
                 detach=True,
                 mem_limit="512m",
                 network_disabled=True,
+                remove=True,
             )
 
             result = container.wait(timeout=self.timeout)
             stdout = container.logs(stdout=True, stderr=False).decode()
             stderr = container.logs(stdout=False, stderr=True).decode()
-
-            container.remove()
 
             return {
                 "success": result["StatusCode"] == 0,
@@ -74,6 +77,20 @@ class DockerREPL:
                 "exit_code": result["StatusCode"],
             }
 
+        except docker.errors.ContainerError as e:
+            return {
+                "success": False,
+                "stdout": "",
+                "stderr": str(e),
+                "exit_code": e.exit_status,
+            }
+        except docker.errors.ImageNotFound as e:
+            return {
+                "success": False,
+                "stdout": "",
+                "stderr": f"Docker image not found: {e}",
+                "exit_code": -1,
+            }
         except Exception as e:
             return {
                 "success": False,
