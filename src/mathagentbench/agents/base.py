@@ -3,6 +3,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
+import re
+import json
 
 from ..core.problem import Problem
 
@@ -26,6 +28,18 @@ class MathAgent(ABC):
     def __init__(self, llm_client: Any, max_steps: int = 10):
         self.llm = llm_client
         self.max_steps = max_steps
+
+    def _parse_action(self, content: str):
+        action_match = re.search(r"Action: (\w+)", content)
+        input_match = re.search(r"Action Input: ({.*})", content, re.DOTALL)
+
+        if not action_match:
+            return "python", {"code": content}
+
+        action = action_match.group(1)
+        action_input = json.loads(input_match.group(1)) if input_match else {}
+
+        return action, action_input
 
     @abstractmethod
     def solve(self, problem: Problem, tools: dict[str, Any]) -> AgentResult:
