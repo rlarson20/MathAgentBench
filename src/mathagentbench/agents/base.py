@@ -29,6 +29,11 @@ class MathAgent(ABC):
         self.llm = llm_client
         self.max_steps = max_steps
 
+    # TODO: improve action parsing
+    # what does that entail
+    # JSON mode or XML tags
+    # enforce structured output
+    # add retrying: see tenacity
     def _parse_action(self, content: str):
         action_match = re.search(r"Action: (\w+)", content)
         input_match = re.search(r"Action Input: ({.*})", content, re.DOTALL)
@@ -40,6 +45,16 @@ class MathAgent(ABC):
         action_input = json.loads(input_match.group(1)) if input_match else {}
 
         return action, action_input
+
+    # FIX: dicts are not the idea here
+    # make pydantic models/dataclass instead of dictionaries
+    def _execute_tool(self, action: str, action_input: dict, tools: dict) -> str:
+        try:
+            handler = tools[action]["handler"]
+            result = handler(**action_input)
+            return json.dumps(result) if isinstance(result, dict) else str(result)
+        except Exception as e:
+            return f"Tool error: {str(e)}"
 
     @abstractmethod
     def solve(self, problem: Problem, tools: dict[str, Any]) -> AgentResult:
