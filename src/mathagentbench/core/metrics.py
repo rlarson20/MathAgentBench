@@ -13,13 +13,23 @@ def compute_metrics(results: list[dict[str, Any]]) -> dict[str, Any]:
         Dictionary of aggregated metrics
     """
     # TODO: Implement metrics
-    # - pass@1
     # - avg_cost
-    # - avg_tokens
     # - avg_tool_calls
-    # - by_difficulty breakdown
     # - by_tag breakdown
-    raise NotImplementedError
+    total = len(results)
+    correct = sum(1 for r in results if r["correct"])
+    return {
+        "pass@1": correct / total
+        if total
+        else 0.0,  # supposed to be unbiased estimator for EV of correct answer in 1 response
+        "total_cost": sum(r["cost"] for r in results),  # TODO: average cost
+        "avg_tokens": sum(r["tokens"] for r in results) / total,
+        "by_difficulty": {
+            d: sum(1 for r in results if r["difficulty"] == d and r["correct"])
+            / sum(1 for r in results if r["difficulty"] == d)
+            for d in ["easy", "medium", "hard"]
+        },
+    }
 
 
 def compare_results(
