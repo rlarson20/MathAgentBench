@@ -57,8 +57,20 @@ class Evaluator:
             True if answer is correct
         """
         # TODO: Implement answer matching logic
-        # - integer: exact match
-        # - float: within tolerance
         # - symbolic: sympy simplification check
-        # - string: normalized comparison
-        raise NotImplementedError
+        expected = problem.answer.strip()
+        actual = result.answer.strip()
+
+        if problem.answer_type == "integer":
+            return int(expected) == int(actual)
+        elif problem.answer_type == "float":
+            tol = problem.tolerance or 1e-6
+            return abs(float(expected) - float(actual)) < tol
+        # TODO: improve symbolic implementation
+        # elif problem.answer_type == "symbolic":
+        #     # Use sympy simplify for equivalence
+        #     from sympy import sympify, simplify
+        #
+        #     return simplify(sympify(expected) - sympify(actual)) == 0
+        else:  # string
+            return expected.lower() == actual.lower()
